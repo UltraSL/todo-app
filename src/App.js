@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AiOutlineDelete } from "react-icons/ai";
 import { BsCheckLg } from "react-icons/bs";
 
@@ -18,7 +18,23 @@ function App() {
     let updatedTodoArr = [...allTodos];
     updatedTodoArr.push(newTodoItem);
     setTodos(updatedTodoArr);
+    localStorage.setItem('todolist', JSON.stringify(updatedTodoArr));
   }
+
+  const handleDeleteTodo = (index) =>{
+    let reducedTodo = [...allTodos];
+    reducedTodo.splice(index);
+
+    localStorage.setItem('todolist', JSON.stringify(reducedTodo));
+    setTodos(reducedTodo);
+  }
+
+  useEffect(()=> {
+    let savedTodos = JSON.parse(localStorage.getItem('todolist'));
+    if(savedTodos){
+      setTodos(savedTodos);
+    }
+  },[])
 
   return (
     <div className="App">
@@ -55,7 +71,7 @@ function App() {
               <p>{item.description}</p>
             </div>
             <div>
-              <AiOutlineDelete className='icon'title='Delete?' />
+              <AiOutlineDelete className='icon' onClick={()=>handleDeleteTodo(index)} title='Delete?' />
               <BsCheckLg className='check-icon' title='Completed?' />
             </div>
           </div>
