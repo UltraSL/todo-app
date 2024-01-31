@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { AiOutlineDelete } from "react-icons/ai";
 import { BsCheckLg } from "react-icons/bs";
 
@@ -8,6 +8,7 @@ function App() {
   const [allTodos, setTodos] = useState([]);
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const descriptionInputRef = useRef(null);
 
   const handleAddTodo = () =>{
     let newTodoItem = {
@@ -23,11 +24,39 @@ function App() {
 
   const handleDeleteTodo = (index) =>{
     let reducedTodo = [...allTodos];
-    reducedTodo.splice(index);
+    reducedTodo.splice(index, 1);
 
     localStorage.setItem('todolist', JSON.stringify(reducedTodo));
     setTodos(reducedTodo);
   }
+
+  const handleClearFields = () => {
+    // Clear the input fields
+    setNewTitle("");
+    setNewDescription("");
+  }
+
+  const handleEnterKeyPress = (e) => {
+    if(e.key==='Enter'){
+      if (e.target.name === 'title') {
+        // If the "Enter" key is pressed in the title input, focus on the description input
+        descriptionInputRef.current.focus();
+      } else {
+        handleAddTodo();
+      }
+      
+    }
+  }
+
+  const handleTabKeyPress = (e) => {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      e.preventDefault();
+      if (e.target.name === 'title') {
+        descriptionInputRef.current.focus();
+      }
+    }
+  }
+
 
   useEffect(()=> {
     let savedTodos = JSON.parse(localStorage.getItem('todolist'));
@@ -44,16 +73,30 @@ function App() {
         <div className="todo-input">
           <div className="todo-input-item">
             <label>Title</label>
-            <input type="text" value={newTitle} onChange={(e)=>setNewTitle(e.target.value)}  placeholder="Enter your Title Here"></input>
+            <input 
+            name="title"
+            type="text" 
+            value={newTitle} 
+            onChange={(e)=>setNewTitle(e.target.value)} 
+            placeholder="Enter your Title Here" 
+            onKeyDown={handleTabKeyPress} />
           </div>
 
           <div className="todo-input-item">
             <label>Description</label>
-            <input type="text" value={newDescription} onChange={(e)=>setNewDescription(e.target.value)} placeholder="Enter your Description Here"></input>
+            <input 
+            type="text"
+            name='description' 
+            onChange={(e) => setNewDescription(e.target.value)} 
+            value={newDescription} 
+            ref={descriptionInputRef} 
+            placeholder="Enter your Description Here" 
+            onKeyDown={handleEnterKeyPress} />
           </div>
 
           <div className="todo-input-item">
             <button type="button" onClick={handleAddTodo} className="primaryBtn">Add</button>
+            <button type="button" onClick={handleClearFields} className="primaryBtn">Clear</button>
           </div>
         </div>
 
