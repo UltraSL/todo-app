@@ -9,6 +9,7 @@ function App() {
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const descriptionInputRef = useRef(null);
+  const [completedTodos, setCompletedTodos] = useState([]);
 
   const handleAddTodo = () =>{
     let newTodoItem = {
@@ -28,6 +29,14 @@ function App() {
 
     localStorage.setItem('todolist', JSON.stringify(reducedTodo));
     setTodos(reducedTodo);
+  }
+
+  const handleDeleteCompletedTodo = (index) => {
+    let reducedTodo = [...completedTodos];
+    reducedTodo.splice(index, 1);
+
+    localStorage.setItem('completedtodolist', JSON.stringify(reducedTodo));
+    setCompletedTodos(reducedTodo);
   }
 
   const handleClearFields = () => {
@@ -57,11 +66,37 @@ function App() {
     }
   }
 
+  const handleCompletedTodos = (index) => {
+    let date = new Date();
+    let dd = date.getDate();
+    let mm = date.getMonth() +1;
+    let yyyy = date.getFullYear();
+    let h = date.getHours();
+    let m = date.getMinutes();
+    let s = date.getSeconds();
+
+    let completedOn = yyyy + "-" + mm + "-" + dd + " at " + h + ":" + m + ":" +s;
+
+    let filteredItem = {
+      ...allTodos[index],
+      completedOn : completedOn
+    };
+
+    let updatedCompletedArr = [...completedTodos];
+    updatedCompletedArr.push(filteredItem);
+    setCompletedTodos(updatedCompletedArr);
+    handleDeleteTodo(index);
+    localStorage.setItem('completedtodolist', JSON.stringify(updatedCompletedArr))
+  }
 
   useEffect(()=> {
     let savedTodos = JSON.parse(localStorage.getItem('todolist'));
+    let savedCompletedTodos = JSON.parse(localStorage.getItem('completedtodolist'));
     if(savedTodos){
       setTodos(savedTodos);
+    }
+    if(savedCompletedTodos){
+      setCompletedTodos(savedCompletedTodos);
     }
   },[])
 
@@ -106,7 +141,7 @@ function App() {
         </div>
 
         <div className='todo-list'>
-          {allTodos.map((item,index) => {
+          {isCompleteScreen===false && allTodos.map((item,index) => {
             return(
               <div className='todo-list-item' key={index}>
             <div>
@@ -115,7 +150,24 @@ function App() {
             </div>
             <div>
               <AiOutlineDelete className='icon' onClick={()=>handleDeleteTodo(index)} title='Delete?' />
-              <BsCheckLg className='check-icon' title='Completed?' />
+              <BsCheckLg className='check-icon' onClick={()=> handleCompletedTodos(index)} title='Completed?' />
+            </div>
+          </div>
+            )
+          })}
+        </div>
+
+        <div className='todo-list'>
+          {isCompleteScreen===true && completedTodos.map((item,index) => {
+            return(
+              <div className='todo-list-item' key={index}>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              <p><small>Completed On : {item.completedOn}</small></p>
+            </div>
+            <div>
+              <AiOutlineDelete className='icon' onClick={()=>handleDeleteCompletedTodo(index)} title='Delete?' />
             </div>
           </div>
             )
